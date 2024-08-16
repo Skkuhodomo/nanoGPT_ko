@@ -1,53 +1,52 @@
-
 # nanoGPT
 
 ![nanoGPT](assets/nanogpt.jpg)
 
-The simplest, fastest repository for training/finetuning medium-sized GPTs. It is a rewrite of [minGPT](https://github.com/karpathy/minGPT) that prioritizes teeth over education. Still under active development, but currently the file `train.py` reproduces GPT-2 (124M) on OpenWebText, running on a single 8XA100 40GB node in about 4 days of training. The code itself is plain and readable: `train.py` is a ~300-line boilerplate training loop and `model.py` a ~300-line GPT model definition, which can optionally load the GPT-2 weights from OpenAI. That's it.
+중형 GPT 모델을 훈련/미세 조정하기 위한 가장 간단하고 빠른 저장소입니다. [minGPT](https://github.com/karpathy/minGPT)의 리라이트 버전으로, 교육보다는 성능을 우선시합니다. 여전히 개발 중이지만, 현재 `train.py` 파일은 GPT-2 (124M)를 OpenWebText에서 단일 8XA100 40GB 노드에서 약 4일 동안 훈련하여 재현합니다. 코드 자체는 간결하고 읽기 쉬워서, `train.py`는 약 300줄의 보일러플레이트 훈련 루프이며, `model.py`는 약 300줄의 GPT 모델 정의입니다. OpenAI에서 GPT-2 가중치를 로드할 수도 있습니다. 이게 전부입니다.
 
 ![repro124m](assets/gpt2_124M_loss.png)
 
-Because the code is so simple, it is very easy to hack to your needs, train new models from scratch, or finetune pretrained checkpoints (e.g. biggest one currently available as a starting point would be the GPT-2 1.3B model from OpenAI).
+코드가 매우 간단하기 때문에 필요에 맞게 수정하거나, 새로운 모델을 처음부터 훈련하거나, 사전 훈련된 체크포인트를 미세 조정하는 것이 매우 쉽습니다 (예: 현재 사용 가능한 가장 큰 시작 모델은 OpenAI의 GPT-2 1.3B 모델입니다).
 
-## install
+## 설치
 
 ```
 pip install torch numpy transformers datasets tiktoken wandb tqdm
 ```
 
-Dependencies:
+의존성:
 
 - [pytorch](https://pytorch.org) <3
 - [numpy](https://numpy.org/install/) <3
--  `transformers` for huggingface transformers <3 (to load GPT-2 checkpoints)
--  `datasets` for huggingface datasets <3 (if you want to download + preprocess OpenWebText)
+-  `transformers` for huggingface transformers <3 (GPT-2 체크포인트 로드용)
+-  `datasets` for huggingface datasets <3 (OpenWebText를 다운로드하고 전처리하려면)
 -  `tiktoken` for OpenAI's fast BPE code <3
 -  `wandb` for optional logging <3
 -  `tqdm` for progress bars <3
 
-## quick start
+## 빠른 시작
 
-If you are not a deep learning professional and you just want to feel the magic and get your feet wet, the fastest way to get started is to train a character-level GPT on the works of Shakespeare. First, we download it as a single (1MB) file and turn it from raw text into one large stream of integers:
+딥러닝 전문가가 아니고 마법을 느끼고 가볍게 시작해보고 싶다면, 가장 빠른 방법은 셰익스피어 작품을 대상으로 문자 수준의 GPT를 훈련하는 것입니다. 먼저, 셰익스피어 텍스트를 단일 (1MB) 파일로 다운로드하고, 이를 정수의 큰 스트림으로 변환합니다:
 
 ```sh
 python data/shakespeare_char/prepare.py
 ```
 
-This creates a `train.bin` and `val.bin` in that data directory. Now it is time to train your GPT. The size of it very much depends on the computational resources of your system:
+이 작업은 `train.bin`과 `val.bin`을 해당 데이터 디렉터리에 생성합니다. 이제 GPT를 훈련할 시간입니다. 모델의 크기는 시스템의 계산 자원에 따라 다릅니다:
 
-**I have a GPU**. Great, we can quickly train a baby GPT with the settings provided in the [config/train_shakespeare_char.py](config/train_shakespeare_char.py) config file:
+**GPU가 있습니다.** 좋습니다. [config/train_shakespeare_char.py](config/train_shakespeare_char.py) 설정 파일에 제공된 설정으로 아기 GPT를 빠르게 훈련할 수 있습니다:
 
 ```sh
 python train.py config/train_shakespeare_char.py
 ```
 
-If you peek inside it, you'll see that we're training a GPT with a context size of up to 256 characters, 384 feature channels, and it is a 6-layer Transformer with 6 heads in each layer. On one A100 GPU this training run takes about 3 minutes and the best validation loss is 1.4697. Based on the configuration, the model checkpoints are being written into the `--out_dir` directory `out-shakespeare-char`. So once the training finishes we can sample from the best model by pointing the sampling script at this directory:
+이 설정 파일을 열어보면, 최대 256자 컨텍스트 크기, 384개의 특징 채널, 6층의 트랜스포머(각 층에 6개의 헤드)를 사용하는 GPT를 훈련 중인 것을 볼 수 있습니다. A100 GPU 하나로 이 훈련은 약 3분이 걸리며, 최고의 검증 손실은 1.4697입니다. 설정에 따라 모델 체크포인트는 `--out_dir` 디렉터리 `out-shakespeare-char`에 저장됩니다. 훈련이 완료되면 이 디렉터리를 가리키는 샘플링 스크립트를 사용하여 최상의 모델에서 샘플을 생성할 수 있습니다:
 
 ```sh
 python sample.py --out_dir=out-shakespeare-char
 ```
 
-This generates a few samples, for example:
+몇 가지 샘플이 생성됩니다. 예를 들면:
 
 ```
 ANGELO:
@@ -70,20 +69,20 @@ That I leave, to fight with over-liking
 Hasting in a roseman.
 ```
 
-lol  `¯\_(ツ)_/¯`. Not bad for a character-level model after 3 minutes of training on a GPU. Better results are quite likely obtainable by instead finetuning a pretrained GPT-2 model on this dataset (see finetuning section later).
+웃음 `¯\_(ツ)_/¯`. GPU에서 3분 동안 훈련한 문자 수준 모델치고는 나쁘지 않습니다. 더 나은 결과를 얻으려면, 이 데이터셋에서 사전 훈련된 GPT-2 모델을 미세 조정하는 것이 좋습니다(추후의 미세 조정 섹션 참조).
 
-**I only have a macbook** (or other cheap computer). No worries, we can still train a GPT but we want to dial things down a notch. I recommend getting the bleeding edge PyTorch nightly ([select it here](https://pytorch.org/get-started/locally/) when installing) as it is currently quite likely to make your code more efficient. But even without it, a simple train run could look as follows:
+**맥북만 있습니다.** (또는 저렴한 컴퓨터) 걱정하지 마세요. GPT를 여전히 훈련할 수 있지만, 설정을 조금 낮추는 것이 좋습니다. 최신 PyTorch nightly를 설치하는 것이 좋습니다([여기서 선택](https://pytorch.org/get-started/locally/))하면 코드가 더 효율적으로 실행될 가능성이 큽니다. 하지만 그렇지 않더라도, 간단한 훈련은 다음과 같이 실행될 수 있습니다:
 
 ```sh
 python train.py config/train_shakespeare_char.py --device=cpu --compile=False --eval_iters=20 --log_interval=1 --block_size=64 --batch_size=12 --n_layer=4 --n_head=4 --n_embd=128 --max_iters=2000 --lr_decay_iters=2000 --dropout=0.0
 ```
 
-Here, since we are running on CPU instead of GPU we must set both `--device=cpu` and also turn off PyTorch 2.0 compile with `--compile=False`. Then when we evaluate we get a bit more noisy but faster estimate (`--eval_iters=20`, down from 200), our context size is only 64 characters instead of 256, and the batch size only 12 examples per iteration, not 64. We'll also use a much smaller Transformer (4 layers, 4 heads, 128 embedding size), and decrease the number of iterations to 2000 (and correspondingly usually decay the learning rate to around max_iters with `--lr_decay_iters`). Because our network is so small we also ease down on regularization (`--dropout=0.0`). This still runs in about ~3 minutes, but gets us a loss of only 1.88 and therefore also worse samples, but it's still good fun:
+여기서, GPU 대신 CPU를 사용하기 때문에 `--device=cpu`를 설정하고 PyTorch 2.0 컴파일도 `--compile=False`로 비활성화해야 합니다. 그런 다음 평가할 때 조금 더 소음이 있지만 빠르게 추정 (`--eval_iters=20`, 이전 200회에서 감소)을 하고, 컨텍스트 크기를 256자 대신 64자로, 배치 크기를 64개 대신 12개의 예제로 설정합니다. 훨씬 작은 트랜스포머(4층, 4개의 헤드, 128 임베딩 크기)를 사용하고, 반복 횟수를 2000으로 줄입니다 (`--lr_decay_iters`). 네트워크가 작기 때문에 정규화를 완화합니다 (`--dropout=0.0`). 이 훈련은 여전히 약 3분 정도 걸리지만, 손실은 1.88로 줄어들고 샘플도 약간 악화됩니다. 그래도 재미있습니다:
 
 ```sh
 python sample.py --out_dir=out-shakespeare-char --device=cpu
 ```
-Generates samples like this:
+다음과 같은 샘플을 생성합니다:
 
 ```
 GLEORKEN VINGHARD III:
@@ -93,135 +92,38 @@ bot thou the sought bechive in that to doth groan you,
 No relving thee post mose the wear
 ```
 
-Not bad for ~3 minutes on a CPU, for a hint of the right character gestalt. If you're willing to wait longer, feel free to tune the hyperparameters, increase the size of the network, the context length (`--block_size`), the length of training, etc.
+CPU에서 약 3분 동안 훈련한 결과로는 나쁘지 않습니다. 하이퍼파라미터를 조정하거나 네트워크 크기, 컨텍스트 길이(`--block_size`), 훈련 시간 등을 늘리면 더 나은 결과를 얻을 수 있습니다.
 
-Finally, on Apple Silicon Macbooks and with a recent PyTorch version make sure to add `--device=mps` (short for "Metal Performance Shaders"); PyTorch then uses the on-chip GPU that can *significantly* accelerate training (2-3X) and allow you to use larger networks. See [Issue 28](https://github.com/karpathy/nanoGPT/issues/28) for more.
+마지막으로, Apple Silicon MacBook과 최신 PyTorch 버전을 사용 중이라면 `--device=mps`(Metal Performance Shaders의 약어)를 추가하세요. 그러면 PyTorch가 칩에 내장된 GPU를 사용하여 훈련 속도를 2-3배까지 크게 향상시키고, 더 큰 네트워크를 사용할 수 있습니다. [Issue 28](https://github.com/karpathy/nanoGPT/issues/28)을 참조하세요.
 
-## reproducing GPT-2
+## GPT-2 재현
 
-A more serious deep learning professional may be more interested in reproducing GPT-2 results. So here we go - we first tokenize the dataset, in this case the [OpenWebText](https://openwebtext2.readthedocs.io/en/latest/), an open reproduction of OpenAI's (private) WebText:
+보다 진지한 딥러닝 전문가는 GPT-2 결과를 재현하는 것에 관심이 있을 수 있습니다. 그래서 여기 있습니다 - 먼저, [OpenWebText](https://openwebtext2.readthedocs.io/en/latest/)라는 OpenAI의 (비공개) WebText의 오픈 복제본을 사용하여 데이터셋을 토큰화합니다:
 
 ```sh
 python data/openwebtext/prepare.py
 ```
 
-This downloads and tokenizes the [OpenWebText](https://huggingface.co/datasets/openwebtext) dataset. It will create a `train.bin` and `val.bin` which holds the GPT2 BPE token ids in one sequence, stored as raw uint16 bytes. Then we're ready to kick off training. To reproduce GPT-2 (124M) you'll want at least an 8X A100 40GB node and run:
+이 명령은 [OpenWebText](https://huggingface.co/datasets/openwebtext) 데이터셋을 다운로드하고 토큰화합니다. GPT2 BPE 토큰 ID를 하나의 시퀀스로 저장한 `train.bin`과 `val.bin`을 생성합니다. 이제 훈련을 시작할 준비가 되었습니다. GPT-2 (124M)를 재현하려면 적어도 8XA100 40GB 노드가 필요하며 다음을 실행해야 합니다:
 
 ```sh
 torchrun --standalone --nproc_per_node=8 train.py config/train_gpt2.py
 ```
 
-This will run for about 4 days using PyTorch Distributed Data Parallel (DDP) and go down to loss of ~2.85. Now, a GPT-2 model just evaluated on OWT gets a val loss of about 3.11, but if you finetune it it will come down to ~2.85 territory (due to an apparent domain gap), making the two models ~match.
+이 훈련은 약 4일 동안 PyTorch Distributed Data Parallel(DDP)을 사용하여 실행되며, 손실은 약 2.85로 감소합니다. 이제 GPT-2 모델은 OWT에서 평가할 때 검증 손실이 약 3.11이지만, 이를 미세 조정하면 약 2.85 영역으로 감소합니다 (도메인 차이 때문입니다), 두 모델이 거의 일치하게 됩니다.
 
-If you're in a cluster environment and you are blessed with multiple GPU nodes you can make GPU go brrrr e.g. across 2 nodes like:
+클러스터 환경에서 여러 GPU 노드를 사용할 수 있다면, 예를 들어 2개의 노드를 사용하여 GPU를
 
-```sh
-# Run on the first (master) node with example IP 123.456.123.456:
-torchrun --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr=123.456.123.456 --master_port=1234 train.py
-# Run on the worker node:
-torchrun --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr=123.456.123.456 --master_port=1234 train.py
-```
-
-It is a good idea to benchmark your interconnect (e.g. iperf3). In particular, if you don't have Infiniband then also prepend `NCCL_IB_DISABLE=1` to the above launches. Your multinode training will work, but most likely _crawl_. By default checkpoints are periodically written to the `--out_dir`. We can sample from the model by simply `python sample.py`.
-
-Finally, to train on a single GPU simply run the `python train.py` script. Have a look at all of its args, the script tries to be very readable, hackable and transparent. You'll most likely want to tune a number of those variables depending on your needs.
-
-## baselines
-
-OpenAI GPT-2 checkpoints allow us to get some baselines in place for openwebtext. We can get the numbers as follows:
+ 16개로 확장하는 경우:
 
 ```sh
-$ python train.py config/eval_gpt2.py
-$ python train.py config/eval_gpt2_medium.py
-$ python train.py config/eval_gpt2_large.py
-$ python train.py config/eval_gpt2_xl.py
+torchrun --nnodes=2 --nproc_per_node=8 --rdzv_id=1 --rdzv_backend=c10d train.py config/train_gpt2.py
 ```
 
-and observe the following losses on train and val:
-
-| model | params | train loss | val loss |
-| ------| ------ | ---------- | -------- |
-| gpt2 | 124M         | 3.11  | 3.12     |
-| gpt2-medium | 350M  | 2.85  | 2.84     |
-| gpt2-large | 774M   | 2.66  | 2.67     |
-| gpt2-xl | 1558M     | 2.56  | 2.54     |
-
-However, we have to note that GPT-2 was trained on (closed, never released) WebText, while OpenWebText is just a best-effort open reproduction of this dataset. This means there is a dataset domain gap. Indeed, taking the GPT-2 (124M) checkpoint and finetuning on OWT directly for a while reaches loss down to ~2.85. This then becomes the more appropriate baseline w.r.t. reproduction.
-
-## finetuning
-
-Finetuning is no different than training, we just make sure to initialize from a pretrained model and train with a smaller learning rate. For an example of how to finetune a GPT on new text go to `data/shakespeare` and run `prepare.py` to download the tiny shakespeare dataset and render it into a `train.bin` and `val.bin`, using the OpenAI BPE tokenizer from GPT-2. Unlike OpenWebText this will run in seconds. Finetuning can take very little time, e.g. on a single GPU just a few minutes. Run an example finetuning like:
+또는, 미세 조정을 원한다면, 예를 들어, `train.py`를 일부 문서나 새로운 데이터에 대해 실행합니다:
 
 ```sh
-python train.py config/finetune_shakespeare.py
+python train.py config/finetune_gpt2.py --init_from=gpt2-xl --data_dir=data/my_custom_data
 ```
 
-This will load the config parameter overrides in `config/finetune_shakespeare.py` (I didn't tune them much though). Basically, we initialize from a GPT2 checkpoint with `init_from` and train as normal, except shorter and with a small learning rate. If you're running out of memory try decreasing the model size (they are `{'gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl'}`) or possibly decreasing the `block_size` (context length). The best checkpoint (lowest validation loss) will be in the `out_dir` directory, e.g. in `out-shakespeare` by default, per the config file. You can then run the code in `sample.py --out_dir=out-shakespeare`:
-
-```
-THEODORE:
-Thou shalt sell me to the highest bidder: if I die,
-I sell thee to the first; if I go mad,
-I sell thee to the second; if I
-lie, I sell thee to the third; if I slay,
-I sell thee to the fourth: so buy or sell,
-I tell thee again, thou shalt not sell my
-possession.
-
-JULIET:
-And if thou steal, thou shalt not sell thyself.
-
-THEODORE:
-I do not steal; I sell the stolen goods.
-
-THEODORE:
-Thou know'st not what thou sell'st; thou, a woman,
-Thou art ever a victim, a thing of no worth:
-Thou hast no right, no right, but to be sold.
-```
-
-Whoa there, GPT, entering some dark place over there. I didn't really tune the hyperparameters in the config too much, feel free to try!
-
-## sampling / inference
-
-Use the script `sample.py` to sample either from pre-trained GPT-2 models released by OpenAI, or from a model you trained yourself. For example, here is a way to sample from the largest available `gpt2-xl` model:
-
-```sh
-python sample.py \
-    --init_from=gpt2-xl \
-    --start="What is the answer to life, the universe, and everything?" \
-    --num_samples=5 --max_new_tokens=100
-```
-
-If you'd like to sample from a model you trained, use the `--out_dir` to point the code appropriately. You can also prompt the model with some text from a file, e.g. ```python sample.py --start=FILE:prompt.txt```.
-
-## efficiency notes
-
-For simple model benchmarking and profiling, `bench.py` might be useful. It's identical to what happens in the meat of the training loop of `train.py`, but omits much of the other complexities.
-
-Note that the code by default uses [PyTorch 2.0](https://pytorch.org/get-started/pytorch-2.0/). At the time of writing (Dec 29, 2022) this makes `torch.compile()` available in the nightly release. The improvement from the one line of code is noticeable, e.g. cutting down iteration time from ~250ms / iter to 135ms / iter. Nice work PyTorch team!
-
-## todos
-
-- Investigate and add FSDP instead of DDP
-- Eval zero-shot perplexities on standard evals (e.g. LAMBADA? HELM? etc.)
-- Finetune the finetuning script, I think the hyperparams are not great
-- Schedule for linear batch size increase during training
-- Incorporate other embeddings (rotary, alibi)
-- Separate out the optim buffers from model params in checkpoints I think
-- Additional logging around network health (e.g. gradient clip events, magnitudes)
-- Few more investigations around better init etc.
-
-## troubleshooting
-
-Note that by default this repo uses PyTorch 2.0 (i.e. `torch.compile`). This is fairly new and experimental, and not yet available on all platforms (e.g. Windows). If you're running into related error messages try to disable this by adding `--compile=False` flag. This will slow down the code but at least it will run.
-
-For some context on this repository, GPT, and language modeling it might be helpful to watch my [Zero To Hero series](https://karpathy.ai/zero-to-hero.html). Specifically, the [GPT video](https://www.youtube.com/watch?v=kCc8FmEb1nY) is popular if you have some prior language modeling context.
-
-For more questions/discussions feel free to stop by **#nanoGPT** on Discord:
-
-[![](https://dcbadge.vercel.app/api/server/3zy8kqD9Cp?compact=true&style=flat)](https://discord.gg/3zy8kqD9Cp)
-
-## acknowledgements
-
-All nanoGPT experiments are powered by GPUs on [Lambda labs](https://lambdalabs.com), my favorite Cloud GPU provider. Thank you Lambda labs for sponsoring nanoGPT!
+대규모 GPT-2 모델(GPT2-xl)을 특정 데이터를 사용하여 미세 조정한 후, `sample.py`를 사용하여 최종 모델을 샘플링할 수 있습니다. 미세 조정된 체크포인트에 가장 흥미로운 예시가 생성될 것입니다.
