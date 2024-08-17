@@ -8,7 +8,7 @@
 
  [minGPT](https://github.com/karpathy/minGPT)의 리라이트 버전으로, 훈련보다는  성능을 우선시합니다. 여전히 개발 중이지만, 현재 `train.py` 파일은 GPT-2 (124M)를 OpenWebText에서 단일 8XA100 40GB 노드에서 약 4일 동안 훈련하여 재현합니다. 코드 자체는 간결하고 읽기 쉬워서, `train.py`는 약 300줄의 Boiler Plate 훈련 루프이며, 
  `model.py`는 약 300줄의 GPT 모델을 구현하였습니다. 
-  OpenAI에서 GPT-2 가중치를 로드할 수도 있습니다. 
+  OpenAI에서 GPT-2 사전 훈련된 가중치를 로드할 수도 있습니다. 
 
 ![repro124m](assets/gpt2_124M_loss.png)
 
