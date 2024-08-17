@@ -2,13 +2,19 @@
 
 ![nanoGPT](assets/nanogpt.jpg)
 
-중형 GPT 모델을 훈련/미세 조정하기 위한 가장 간단하고 빠른 저장소입니다. [minGPT](https://github.com/karpathy/minGPT)의 리라이트 버전으로, 교육보다는 성능을 우선시합니다. 여전히 개발 중이지만, 현재 `train.py` 파일은 GPT-2 (124M)를 OpenWebText에서 단일 8XA100 40GB 노드에서 약 4일 동안 훈련하여 재현합니다. 코드 자체는 간결하고 읽기 쉬워서, `train.py`는 약 300줄의 보일러플레이트 훈련 루프이며, `model.py`는 약 300줄의 GPT 모델 정의입니다. OpenAI에서 GPT-2 가중치를 로드할 수도 있습니다. 이게 전부입니다.
+이곳은 GPT 모델을 훈련/미세 조정하기 위한 가장 간단하고 빠른 레포지토리입니다!
+
+(한국어로 현재 번역 작업을 진행하고 있습니다. 코드 중 한국어로 번역 및 기본적인 GPT-2의 구조를 학습하고 싶으신 분은 `gpt_dev.ipynb`를 참고하세요. )
+
+ [minGPT](https://github.com/karpathy/minGPT)의 리라이트 버전으로, 훈련보다는  성능을 우선시합니다. 여전히 개발 중이지만, 현재 `train.py` 파일은 GPT-2 (124M)를 OpenWebText에서 단일 8XA100 40GB 노드에서 약 4일 동안 훈련하여 재현합니다. 코드 자체는 간결하고 읽기 쉬워서, `train.py`는 약 300줄의 Boiler Plate 훈련 루프이며, 
+ `model.py`는 약 300줄의 GPT 모델을 구현하였습니다. 
+  OpenAI에서 GPT-2 가중치를 로드할 수도 있습니다. 
 
 ![repro124m](assets/gpt2_124M_loss.png)
 
 코드가 매우 간단하기 때문에 필요에 맞게 수정하거나, 새로운 모델을 처음부터 훈련하거나, 사전 훈련된 체크포인트를 미세 조정하는 것이 매우 쉽습니다 (예: 현재 사용 가능한 가장 큰 시작 모델은 OpenAI의 GPT-2 1.3B 모델입니다).
 
-## 설치
+## Before Get Started
 
 ```
 pip install torch numpy transformers datasets tiktoken wandb tqdm
@@ -24,9 +30,8 @@ pip install torch numpy transformers datasets tiktoken wandb tqdm
 -  `wandb` for optional logging <3
 -  `tqdm` for progress bars <3
 
-## 빠른 시작
-
-딥러닝 전문가가 아니고 마법을 느끼고 가볍게 시작해보고 싶다면, 가장 빠른 방법은 셰익스피어 작품을 대상으로 문자 수준의 GPT를 훈련하는 것입니다. 먼저, 셰익스피어 텍스트를 단일 (1MB) 파일로 다운로드하고, 이를 정수의 큰 스트림으로 변환합니다:
+## Quick Start
+딥러닝 전문가가 아니지만, GPT-2 의 놀라운 성능을 경험해보고 싶다면, 가장 빠른 방법은 셰익스피어 작품을 대상으로 문자 수준의 GPT를 훈련하는 것입니다. 먼저, 셰익스피어 텍스트를 단일 (1MB) 파일로 다운로드하고, 이를 큰 스트림의 정수로 변환합니다:
 
 ```sh
 python data/shakespeare_char/prepare.py
